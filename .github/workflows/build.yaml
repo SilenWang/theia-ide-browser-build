@@ -5,7 +5,7 @@ on:
     - cron: '0 */6 * * *'  # 每6小时检查一次
   workflow_dispatch:     # 允许手动触发
     inputs:
-      tags:
+      tag:
         description: 'Version tag to build'
         required: true
         type: string
@@ -53,8 +53,8 @@ jobs:
         id: save_info
         run: |
             echo "Force trigger new build!"
-            echo "Tag: ${{ github.event.inputs.tags }}"
-            echo "tag=${{ github.event.inputs.tags }}" >> $GITHUB_OUTPUT
+            echo "Tag: ${{ github.event.inputs.tag }}"
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
 
     outputs:
       tag: ${{ steps.save_info.outputs.tag }}
@@ -86,29 +86,20 @@ jobs:
     outputs:
       tag: ${{ steps.save_info.outputs.tag }}
 
-  build_certimate: # 跳过似乎会向下传导，不加always, 两个trigger之一被跳过就会不执行build
+  build_thiea: # 跳过似乎会向下传导，不加always, 两个trigger之一被跳过就会不执行build
     needs: [build_trigger]
     if:  ${{ always() && (needs.build_trigger.outputs.tag != ''  || needs.build_trigger.outputs.tag != null) }}
     permissions:
       contents: write
     runs-on: ubuntu-22.04-arm
     steps:
-      
-      - name: Download target thiea-ide
-        id: download
-        uses: robinraju/release-downloader@v1.11
-        with:
-          repository: 'eclipse-theia/theia-ide'
-          tag: ${{ needs.build_trigger.outputs.tag }}
-          zipBall: true
-          out-file-path: 'theia-ide'
-          extract: true
 
-      - name: Get folder
-        id: folder
-        run: |
-          folder=`unzip -l ${{ fromJson(steps.download.outputs.downloaded_files)[0] }} | awk 'NR > 3 && /\/$/ {print $4; exit}'`
-          echo "folder=${folder}" >> $GITHUB_OUTPUT
+      - name: Checkout Specific Tag
+        uses: actions/checkout@v4
+        with:
+          ref:  ${{ needs.build_trigger.outputs.tag }}  # 指定要检出的 tag 名称
+          path: theia-ide
+          fetch-depth: 0  # 确保获取完整的仓库历史记录（可选）
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -116,7 +107,7 @@ jobs:
           node-version: 20.11.0
 
       - name: Build Theia Browser
-        working-directory: ./theia-ide/${{ steps.folder.outputs.folder }}
+        working-directory: theia-ide
         shell: bash
         run: |
           yarn build:extensions
@@ -125,7 +116,7 @@ jobs:
           yarn
 
       - name: Compress output
-        working-directory: ./theia-ide/${{ steps.folder.outputs.folder }}/applications
+        working-directory: theia-ide/applications
         run: |
           7zz -tzip a browser.zip browser
 
@@ -136,7 +127,7 @@ jobs:
           generateReleaseNotes: true  #自动生成发行说明。
           owner: "SilenWang"
           repo: "theia-ide-browser-build"
-          artifacts: '${{ github.workspace }}/theia-ide/${{ steps.folder.outputs.folder }}/applications/*.zip'
+          artifacts: '${{ github.workspace }}/theia-ide/applications/*.zip'
           removeArtifacts: true
           replacesArtifacts: true
           allowUpdates: true
