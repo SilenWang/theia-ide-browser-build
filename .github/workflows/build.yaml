@@ -111,7 +111,6 @@ jobs:
         working-directory: theia-ide
         shell: bash
         run: |
-          ls -l ./
           yarn --pure-lockfile
           yarn build:extensions
           yarn download:plugins
@@ -121,7 +120,7 @@ jobs:
       - name: Compress output
         working-directory: theia-ide/applications
         run: |
-          7zz -tzip a browser.zip browser
+          tar -czf browser.tar.gz browser
 
       - name: Release
         uses: ncipollo/release-action@v1.15.0
