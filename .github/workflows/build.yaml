@@ -129,7 +129,7 @@ jobs:
           generateReleaseNotes: true  #自动生成发行说明。
           owner: "SilenWang"
           repo: "theia-ide-browser-build"
-          artifacts: '${{ github.workspace }}/theia-ide/applications/*.zip'
+          artifacts: '${{ github.workspace }}/theia-ide/applications/*.gz'
           removeArtifacts: true
           replacesArtifacts: true
           allowUpdates: true
