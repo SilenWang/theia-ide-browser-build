@@ -114,7 +114,6 @@ jobs:
           yarn build:extensions
           yarn download:plugins
           yarn browser build
-          yarn
 
       - name: Compress output
         working-directory: theia-ide/applications
