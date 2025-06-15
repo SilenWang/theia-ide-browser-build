@@ -97,6 +97,7 @@ jobs:
       - name: Checkout Specific Tag
         uses: actions/checkout@v4
         with:
+          repository: 'eclipse-theia/theia-ide'
           ref:  ${{ needs.build_trigger.outputs.tag }}  # 指定要检出的 tag 名称
           path: theia-ide
           fetch-depth: 0  # 确保获取完整的仓库历史记录（可选）
