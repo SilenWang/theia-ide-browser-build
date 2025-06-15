@@ -105,15 +105,18 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.11.0
+          node-version: 20
 
       - name: Build Theia Browser
         working-directory: theia-ide
         shell: bash
         run: |
+          ls -l ./
+          yarn --pure-lockfile
           yarn build:extensions
           yarn download:plugins
           yarn browser build
+          yarn
 
       - name: Compress output
         working-directory: theia-ide/applications
