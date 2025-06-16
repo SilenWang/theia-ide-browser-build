@@ -116,11 +116,17 @@ jobs:
           yarn download:plugins
           yarn browser build
           yarn
+          yarn autoclean --init
+          echo *.ts >> .yarnclean
+          echo *.ts.map >> .yarnclean
+          echo *.spec.* >> .yarnclean
+          yarn autoclean --force
+          yarn cache clean
+          rm -rf .git applications/electron theia-extensions/launcher theia-extensions/updater node_modules
 
       - name: Compress output
-        working-directory: theia-ide/applications
         run: |
-          tar -czf browser.tar.gz browser
+          tar -czf theia-ide.tar.gz theia-ide
 
       - name: Release
         uses: ncipollo/release-action@v1.15.0
@@ -129,7 +135,7 @@ jobs:
           generateReleaseNotes: true  #自动生成发行说明。
           owner: "SilenWang"
           repo: "theia-ide-browser-build"
-          artifacts: '${{ github.workspace }}/theia-ide/applications/*.gz'
+          artifacts: '${{ github.workspace }}/*.gz'
           removeArtifacts: true
           replacesArtifacts: true
           allowUpdates: true
